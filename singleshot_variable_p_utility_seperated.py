@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Simulation parameters
-n_simulations = 1000  # Number of times the simulation is run
+n_simulations = 100  # Number of times the simulation is run
 n_agents = 100  # Total number of agents
 threshold_crowded = 50  # Threshold for the bar to be considered crowded
 
