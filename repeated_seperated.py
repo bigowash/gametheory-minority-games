@@ -32,7 +32,8 @@ threshold_crowded = 50  # Threshold for the bar to be considered crowded
 history = []
 
 # Strategy probabilities
-strategy_p = [0.561]  # Adjusted to contain different strategies
+strategy_p = [0.4]  # Adjusted to contain different strategies
+# strategy_p = [0.561]  # Adjusted to contain different strategies
 # strategy_p = [0.25, 0.5, 0.75]  # Adjusted to contain different strategies
 # strategy_p = [0.96, 0.35, 0.75]  # Adjusted to contain different strategies
 
