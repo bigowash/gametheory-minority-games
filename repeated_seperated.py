@@ -25,14 +25,16 @@ def payoff(n_going, decision):
         return -utility(n_going)  # Assuming staying has the opposite utility effect
 
 # Simulation parameters
-days = 1000  # Number of times the simulation is run for testing
-n_agents = 100  # Total number of agents
+days = 200  # Number of times the simulation is run for testing
+n_agents = 101  # Total number of agents
 threshold_crowded = 50  # Threshold for the bar to be considered crowded
 
+history = []
+
 # Strategy probabilities
-# strategy_p = [0.5]  # Adjusted to contain different strategies
+strategy_p = [0.561]  # Adjusted to contain different strategies
 # strategy_p = [0.25, 0.5, 0.75]  # Adjusted to contain different strategies
-strategy_p = [0.96, 0.35, 0.75]  # Adjusted to contain different strategies
+# strategy_p = [0.96, 0.35, 0.75]  # Adjusted to contain different strategies
 
 # Initialize agent profiles with unique IDs and strategies
 agent_profiles = [{
@@ -60,6 +62,7 @@ for day in range(days):
         decisions.append(decision)
 
     n_going = np.sum(decisions)
+    history.append(n_going)
 
     for agent_id, decision in zip(agent_ids, decisions):
         agent = next(filter(lambda x: x['id'] == agent_id, agent_profiles))
@@ -90,13 +93,54 @@ plt.figure(figsize=(12, 6))
 for i in range(len(strategy_p)):
     start_index = (n_agents // len(strategy_p)) * i
     end_index = (n_agents // len(strategy_p)) * (i + 1)
-    plt.scatter(range(start_index, end_index), average_utilities_going[start_index:end_index], c=colors[i], label=f'(Strategy p={strategy_p[i]})', marker=shapes[0])
-    plt.scatter(range(start_index, end_index), average_utilities_staying[start_index:end_index], c=colors[i], marker=shapes[1])
+    # plt.scatter(range(start_index, end_index), average_utilities_going[start_index:end_index], c=colors[i], label=f'(Strategy p={strategy_p[i]})', marker=shapes[0])
+    # plt.scatter(range(start_index, end_index), average_utilities_staying[start_index:end_index], c=colors[i], marker=shapes[1])
     plt.scatter(range(start_index, end_index), cumulative_utilities[start_index:end_index], c=colors[i], marker='x')
 
 plt.xlabel('Agent ID')
 plt.ylabel('Average Utility')
-plt.title(f'Average Utility of Agents Going and Staying over {days} Days')
+plt.title(f'Cumulative Utility of Agents over {days} Days. All with Strategy p={strategy_p[0]}')
+# plt.title(f'Average Utility of Agents over {days} Day. {n_going} Agents at bar')
 plt.legend()
+plt.grid(True)
+plt.show()
+
+# Plotting the history of the number of agents going to the bar over time
+plt.figure(figsize=(12, 6))
+plt.plot(range(1, days + 1), history, color='black', marker='o', linestyle='-', linewidth=2)
+plt.xlabel('Day')
+plt.ylabel('Number of Agents at Bar')
+plt.title('Bar attendance over time')
+plt.grid(True)
+plt.show()
+
+# cumulative_utilities_by_day = []
+# for day in range(days):
+#     total_utility = sum(agent['history'][day]['utility'] for agent in agent_profiles)
+#     cumulative_utilities_by_day.append(total_utility)
+
+# # Plotting the cumulative utilities over time
+# plt.figure(figsize=(12, 6))
+# plt.plot(range(1, days + 1), cumulative_utilities_by_day, color='orange', marker='o', linestyle='-', linewidth=2)
+# plt.xlabel('Day')
+# plt.ylabel('Cumulative Utility')
+# plt.title('Cumulative Utility of All Agents Over Time')
+# plt.grid(True)
+# plt.show()
+
+# Calculate cumulative utilities for each day
+cumulative_utilities_by_day = []
+cumulative_utility = 0
+for day in range(days):
+    total_utility = sum(agent['history'][day]['utility'] for agent in agent_profiles)
+    cumulative_utility += total_utility
+    cumulative_utilities_by_day.append(cumulative_utility)
+
+# Plotting the cumulative utilities over time
+plt.figure(figsize=(12, 6))
+plt.plot(range(1, days + 1), cumulative_utilities_by_day, color='orange', marker='o', linestyle='-', linewidth=2)
+plt.xlabel('Day')
+plt.ylabel('Cumulative Utility')
+plt.title('Cumulative Utility of All Agents Over Time')
 plt.grid(True)
 plt.show()
