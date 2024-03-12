@@ -66,26 +66,21 @@ history = []
 days = 200  # Number of times the simulation is run for testing
 n_agents = 101  # Total number of agents
 threshold_crowded = 50  # Threshold for the bar to be considered crowded
-n_strats = 3  # Number of strategies
+n_strats = 2  # Number of strategies
 
 # Initialize agent profiles with unique IDs and strategies
 agent_profiles = []
+agents_per_strategy = n_agents // n_strats
+
 for i in range(n_agents):
-    if i < n_agents // 3:
-        strategy_id = 1  # First third gets strategy 1
-    elif i < 2 * n_agents // 3:
-        strategy_id = 2  # Second third gets strategy 2
-    else:
-        strategy_id = 3  # Last third gets strategy 3
+    strategy_id = (i // agents_per_strategy) % n_strats + 1  # Ensure strategy_id ranges between 1 and n_strats
     
     agent_profiles.append({
         'id': i,
         'strategy_id': strategy_id,
         'strategy_factor': np.random.rand(),  # Randomly choose a strategy probability between 0 and 1
         'strategy_days': 1,  # Randomly choose a strategy days between 1 and 4
-        # 'strategy_days': np.random.randint(1, 5),  # Randomly choose a strategy days between 1 and 4
         'p': 0.561,  # Initial probability
-        # 'p': np.random.rand(),  # Initial probability
         'history': [],
         'cumulative_utility': 0,
         'utility_going': 0,
