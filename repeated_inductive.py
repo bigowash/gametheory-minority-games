@@ -28,9 +28,9 @@ def payoff(n_going, decision):
 # Choose strategy function
 def choose_strategy(strategy_id):
     strategies = {
-        1: strategy_1,
+        1: strategy_3,
         2: strategy_2,
-        3: strategy_3,
+        # 3: strategy_1,
         # 4: strategy_4,
     }
     return strategies.get(strategy_id, strategy_1)  # Default to strategy_1 if not found
@@ -61,12 +61,15 @@ def strategy_3(X=1,  p=0.561):
     probability = max(0, min(1, (difference + threshold_crowded) / (2 * threshold_crowded)))
     return probability
 
-history = []
+
 # Simulation parameters
-days = 200  # Number of times the simulation is run for testing
+days = 100  # Number of times the simulation is run for testing
 n_agents = 101  # Total number of agents
 threshold_crowded = 50  # Threshold for the bar to be considered crowded
 n_strats = 2  # Number of strategies
+
+history = []
+history_seperated = {i: [] for i in range(1, n_strats + 1)}
 
 # Initialize agent profiles with unique IDs and strategies
 agent_profiles = []
@@ -92,6 +95,10 @@ agent_ids = [agent['id'] for agent in agent_profiles]
 
 # Simulation
 for day in range(days):
+
+    for i in range(1,n_strats+1):
+        history_seperated[i].append(0)
+
     decisions = []
     # Randomize the order of agent IDs
     np.random.shuffle(agent_ids)
@@ -109,6 +116,13 @@ for day in range(days):
 
         decision = np.random.binomial(1, agent['p'])
         decisions.append(decision)
+        
+        # if (agent['strategy_id'] == 1):
+        history_seperated[agent['strategy_id']][day]+=decision
+        # # elif (agent['strategy_id'] == 2):
+        #     history_seperated[2]+=decision
+        # else:
+        #     history_seperated[3]+=decision
 
     n_going = np.sum(decisions)
     history.append(n_going)
@@ -138,7 +152,6 @@ color_mapping = {
     2: 'green',
     3: 'orange'
 }
-# colors = ['blue', 'green', 'orange']
 shapes = ['o', 's']  # Circles for going, squares for staying
 
 # Plotting average utilities for agents going and staying
@@ -154,14 +167,42 @@ plt.title(f'Cumulative Utility of Agents by Strategy over {days} Days')
 plt.grid(True)
 plt.show()
 
+
+# # Plotting the history of the number of agents going to the bar over time
+# plt.figure(figsize=(12, 6))
+
+# plt.plot(range(1, days + 1), history, label='Overall', color='black', linewidth=2)
+
+# # Plot history for each strategy
+# for strategy_id, counts in history_seperated.items():
+#     color = color_mapping[strategy_id]  # Get the color based on the strategy ID
+#     plt.plot(range(1, len(counts) + 1), counts, label=f'Strategy {strategy_id}', color=color, linestyle='--')
+
+# plt.xlabel('Day')
+# plt.ylabel('Number of Agents at Bar')
+# plt.title('Bar attendance over time')
+# plt.legend()
+# plt.grid(True)
+# plt.show()
+
 # Plotting the history of the number of agents going to the bar over time
 plt.figure(figsize=(12, 6))
-plt.plot(range(1, days + 1), history, color='black', marker='o', linestyle='-', linewidth=2)
+
+bottom = np.zeros(days)  # Initialize the bottom of the bars to zero
+
+# Plotting a stacked bar chart for each strategy
+for strategy_id, counts in history_seperated.items():
+    color = color_mapping[strategy_id]  # Get the color based on the strategy ID
+    plt.bar(range(1, len(counts) + 1), counts, label=f'Strategy {strategy_id}', color=color, alpha=0.6, bottom=bottom)
+    bottom += np.array(counts)  # Update the bottom for the next set of bars
+
 plt.xlabel('Day')
 plt.ylabel('Number of Agents at Bar')
-plt.title('Bar attendance over time')
+plt.title('Bar attendance over time by strategy')
+plt.legend()
 plt.grid(True)
 plt.show()
+
 
 cumulative_utilities_by_strategy = {i: [0] * days for i in range(1, n_strats + 1)}  # Initialize with zeros for each day
 
