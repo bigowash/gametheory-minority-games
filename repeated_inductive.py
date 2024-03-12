@@ -1,16 +1,3 @@
-# strategies:
-# pure
-# - Look at X last days, take average of people going, do the same check as above and change p
-# # - Look at the last X days, try to predict the next day, see how that compares to threshold, change p accordingly
-# mixed form. Given a current p
-# - Look at X days ago, if higher/lower than threshold reduce/increase p by a threshold*factor
-# - Look at X days ago, if higher/lower than threshold reduce/increase p by 0.1*factor
-# - Look at X days ago, see difference to threshold, make p += difference
-# - Look at X days ago, see difference to threshold, make p = 1-threshold
-
-# I would like these strategeis to be randomly allocated to each agent, and record which strategy is allocated to which agent
-# I would like their strategies to be displayed in the graph based on color, and make sure that the key reflects this. 
-# I would like them to change their strategy when ever they lose (when their utility is negative)
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -77,14 +64,9 @@ def strategy_3(X=1,  p=0.561):
 history = []
 # Simulation parameters
 days = 200  # Number of times the simulation is run for testing
-n_agents = 100  # Total number of agents
+n_agents = 101  # Total number of agents
 threshold_crowded = 50  # Threshold for the bar to be considered crowded
 n_strats = 3  # Number of strategies
-
-# Strategy probabilities
-# strategy_p = [0.5]  # Adjusted to contain different strategies
-# strategy_p = [0.25, 0.5, 0.75]  # Adjusted to contain different strategies
-# strategy_p = [0.96, 0.35]  # Adjusted to contain different strategies
 
 # Initialize agent profiles with unique IDs and strategies
 agent_profiles = []
@@ -156,26 +138,26 @@ average_utilities_staying = [agent['utility_staying'] for agent in agent_profile
 cumulative_utilities = [agent['cumulative_utility'] for agent in agent_profiles]
 
 # Determine the colors and shapes for each cluster
-colors = ['blue', 'green', 'orange']
+color_mapping = {
+    1: 'blue',
+    2: 'green',
+    3: 'orange'
+}
+# colors = ['blue', 'green', 'orange']
 shapes = ['o', 's']  # Circles for going, squares for staying
 
 # Plotting average utilities for agents going and staying
 plt.figure(figsize=(12, 6))
 
-for i in range(n_strats):
-    start_index = (n_agents // n_strats) * i
-    end_index = (n_agents // n_strats) * (i + 1)
-    # plt.scatter(range(start_index, end_index), average_utilities_going[start_index:end_index], c=colors[i], label=f'(Strategy {i})', marker=shapes[0])
-    # plt.scatter(range(start_index, end_index), average_utilities_staying[start_index:end_index], c=colors[i], marker=shapes[1])
-    plt.scatter(range(start_index, end_index), cumulative_utilities[start_index:end_index], c=colors[i], marker='x')
+for agent in agent_profiles:
+    color = color_mapping[agent['strategy_id']]  # Get the color based on the agent's strategy ID
+    plt.scatter(agent['id'], agent['cumulative_utility'], c=color, marker='x')
 
 plt.xlabel('Agent ID')
-plt.ylabel('Average Utility')
-plt.title(f'Average Utility of Agents Going and Staying over {days} Days')
-plt.legend()
+plt.ylabel('Cumulative Utility')
+plt.title(f'Cumulative Utility of Agents by Strategy over {days} Days')
 plt.grid(True)
 plt.show()
-# print(agent_profiles)
 
 # Plotting the history of the number of agents going to the bar over time
 plt.figure(figsize=(12, 6))
@@ -186,9 +168,6 @@ plt.title('Bar attendance over time')
 plt.grid(True)
 plt.show()
 
-# Calculate cumulative utilities for each day
-# Calculate cumulative utilities by strategy
-# Calculate cumulative utilities by strategy
 cumulative_utilities_by_strategy = {i: [0] * days for i in range(1, n_strats + 1)}  # Initialize with zeros for each day
 
 for agent in agent_profiles:
@@ -199,11 +178,9 @@ for agent in agent_profiles:
         cumulative_utility += total_utility
         cumulative_utilities_by_strategy[strategy_id][day] = total_utility
 
-# Plotting the cumulative utilities by strategy over time
-plt.figure(figsize=(12, 6))
-
 for strategy_id, cumulative_utilities in cumulative_utilities_by_strategy.items():
-    plt.plot(range(1, days + 1), cumulative_utilities, label=f'Strategy {strategy_id}')
+    color = color_mapping[strategy_id]  # Get the color based on the strategy ID
+    plt.plot(range(1, days + 1), cumulative_utilities, label=f'Strategy {strategy_id}', color=color)
 
 plt.xlabel('Day')
 plt.ylabel('Cumulative Utility')
@@ -211,13 +188,3 @@ plt.title('Cumulative Utility by Strategy Over Time')
 plt.legend()
 plt.grid(True)
 plt.show()
-
-
-# # Plotting the cumulative utilities over time
-# plt.figure(figsize=(12, 6))
-# plt.plot(range(1, days + 1), cumulative_utilities_by_day, color='orange', marker='o', linestyle='-', linewidth=2)
-# plt.xlabel('Day')
-# plt.ylabel('Cumulative Utility')
-# plt.title('Cumulative Utility of All Agents Over Time')
-# plt.grid(True)
-# plt.show()
