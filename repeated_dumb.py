@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy.polynomial import Polynomial
+from scipy import stats
 
 # Define the utility function
 def utility(n_going):
@@ -95,6 +97,23 @@ cumulative_utilities = [agent['cumulative_utility'] for agent in agent_profiles]
 colors = ['blue', 'green', 'orange']
 shapes = ['o', 's']  # Circles for going, squares for staying
 
+
+# Convert history to a NumPy array for easier statistical calculations
+history_array = np.array(history)
+
+# Calculate statistical information
+mean = np.mean(history_array)
+median = np.median(history_array)
+std_dev = np.std(history_array)
+variance = np.var(history_array)
+
+# Print the results
+print("Statistical Information on History Array:")
+print(f"Mean: {mean}")
+print(f"Median: {median}")
+print(f"Standard Deviation: {std_dev}")
+print(f"Variance: {variance}")
+
 # Plotting average utilities for agents going and staying
 plt.figure(figsize=(12, 6))
 
@@ -114,14 +133,25 @@ plt.legend()
 plt.grid(True)
 plt.show()
 
-# Plotting the history of the number of agents going to the bar over time
 plt.figure(figsize=(12, 6))
-plt.plot(range(1, days + 1), history, color='black', marker='o', linestyle='-', linewidth=2)
+
+plt.plot(range(1, days + 1), history, label='Overall', color='black', linewidth=1)
+plt.axhline(y=threshold_crowded, color='red', linestyle='--', label='Threshold Capacity')
+
+# Calculate the trendline using linear regression
+slope, intercept, _, _, _ = stats.linregress(range(1, days + 1), history)
+trendline = [slope * x + intercept for x in range(1, days + 1)]
+
+# Plot the trendline
+plt.plot(range(1, days + 1), trendline, label='Trendline', color='blue', linestyle='--')
+
 plt.xlabel('Day')
 plt.ylabel('Number of Agents at Bar')
 plt.title('Bar attendance over time')
+plt.legend()
 plt.grid(True)
 plt.show()
+
 
 # cumulative_utilities_by_day = []
 # for day in range(days):
@@ -156,27 +186,27 @@ plt.show()
 
 # Assuming the rest of your simulation has been run and agent_profiles is populated
 
-# Select 50 agents for display (here, just taking the first 50 for simplicity)
-selected_agents = agent_profiles[:20]
+# # Select 50 agents for display (here, just taking the first 50 for simplicity)
+# selected_agents = agent_profiles[:20]
 
-# Calculate cumulative utilities for each selected agent over the 200 days
-cumulative_utilities_over_days = np.zeros((len(selected_agents), days))
+# # Calculate cumulative utilities for each selected agent over the 200 days
+# cumulative_utilities_over_days = np.zeros((len(selected_agents), days))
 
-for i, agent in enumerate(selected_agents):
-    cumulative_utility = np.cumsum([day_info['utility'] for day_info in agent['history']])
-    cumulative_utilities_over_days[i] = cumulative_utility
+# for i, agent in enumerate(selected_agents):
+#     cumulative_utility = np.cumsum([day_info['utility'] for day_info in agent['history']])
+#     cumulative_utilities_over_days[i] = cumulative_utility
 
-# Plotting
-plt.figure(figsize=(14, 8))
+# # Plotting
+# plt.figure(figsize=(14, 8))
 
-# Creating a colormap
-colors = plt.cm.jet(np.linspace(0, 1, len(selected_agents)))
+# # Creating a colormap
+# colors = plt.cm.jet(np.linspace(0, 1, len(selected_agents)))
 
-for i, cumulative_utilities in enumerate(cumulative_utilities_over_days):
-    plt.plot(range(1, days + 1), cumulative_utilities, color=colors[i], linewidth=1)
+# for i, cumulative_utilities in enumerate(cumulative_utilities_over_days):
+#     plt.plot(range(1, days + 1), cumulative_utilities, color=colors[i], linewidth=1)
 
-plt.xlabel('Day')
-plt.ylabel('Cumulative Utility')
-plt.title('Cumulative Utility Over 200 Days for 50 Agents')
-plt.grid(True)
-plt.show()
+# plt.xlabel('Day')
+# plt.ylabel('Cumulative Utility')
+# plt.title('Cumulative Utility Over 200 Days for 50 Agents')
+# plt.grid(True)
+# plt.show()
