@@ -114,6 +114,23 @@ print(f"Median: {median}")
 print(f"Standard Deviation: {std_dev}")
 print(f"Variance: {variance}")
 
+# Convert history to a NumPy array for easier statistical calculations
+utilities_array = np.array(cumulative_utilities)
+
+# Calculate statistical information
+mean = np.mean(utilities_array)
+median = np.median(utilities_array)
+std_dev = np.std(utilities_array)
+variance = np.var(utilities_array)
+
+# Print the results
+print("Statistical Information on Agent's Utilites")
+print(f"Mean: {mean}")
+print(f"Median: {median}")
+print(f"Standard Deviation: {std_dev}")
+print(f"Variance: {variance}")
+
+
 # Plotting average utilities for agents going and staying
 plt.figure(figsize=(12, 6))
 

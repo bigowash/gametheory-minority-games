@@ -37,9 +37,9 @@ history = []
 # Strategy probabilities
 # strategy_p = [0.45]  # -8500
 # strategy_p = [0.5]  # -4000
-# strategy_p = [0.495]  # -4000
+strategy_p = [0.495]  # -4000
 # strategy_p = [0.53]  # -2700
-strategy_p = [0.548]  # -2650
+# strategy_p = [0.548]  # -2650
 # strategy_p = [0.55]  # -2650
 # strategy_p = [0.56]  # -3000
 # strategy_p = [0.561]  # -3000

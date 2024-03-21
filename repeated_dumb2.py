@@ -32,44 +32,33 @@ def choose_strategy(strategy_id):
     strategies = {
         1: strategy_2_01,
         2: strategy_2_02,
-        3: strategy_6_15,
+        # 3: strategy_2_03,
     }
     return strategies.get(strategy_id)  # Default to strategy_1 if not found
 
 factorList = {
-    1: 0.0,
-    2: 0.05,
-    3: 0.05
+    # 1: 0.548-0.05,
+    1:0.74,
+    2: 0.548,
+    # 2: 0.548+0.2
+    2:0.34
 }
 
 def strategy_2_01(X=3,  p=0.548, factor=factorList[1]):
-    if len(history) < X:
-        return p
-    return p
-
+    return factorList[1]
 def strategy_2_02(X=3,  p=0.548, factor=factorList[2]):
-    if len(history) < X:
-        return p
-    last_n_going = np.mean(history[-X:]) if len(history) >= X else 0
-    difference = last_n_going - threshold_crowded
-    adjustment = -difference * (1 / (n_agents - threshold_crowded))  * factor
-    new_p = min(1, max(0, p + adjustment))
-    return new_p
+    return factorList[2]
 
-def strategy_6_15(X=3, p=0.548, threshold_adjust=0, factor=factorList[3]):
-    if len(history) < X:
-        return p, threshold_adjust
-    avg_n_going = np.mean(history[-X:])
-    threshold_adjust -=  factor  * (avg_n_going - threshold_crowded)
-    adjustment =  ((threshold_crowded+threshold_adjust) - avg_n_going) / n_agents
-    new_p = max(0, min(1, p + adjustment))
-    return (new_p, threshold_adjust)
+
+# def strategy_2_03(X=3,  p=0.548, factor=factorList[3]):
+#     return factorList[3]
+
 
 # Simulation parameters
 days = 1000  # Number of times the simulation is run for testing
 n_agents = 101  # Total number of agents
 threshold_crowded = 50  # Threshold for the bar to be considered crowded
-n_strats = 3  # Number of strategies
+n_strats = 3 # Number of strategies
 
 history = []
 history_seperated = {i: [] for i in range(1, n_strats + 1)}
@@ -77,6 +66,7 @@ history_seperated = {i: [] for i in range(1, n_strats + 1)}
 # Initialize agent profiles with unique IDs and strategies
 agent_profiles = []
 agents_per_strategy = n_agents // n_strats
+
 
 for i in range(n_agents):
     strategy_id = (i // agents_per_strategy) % n_strats + 1  # Ensure strategy_id ranges between 1 and n_strats
@@ -112,14 +102,11 @@ for day in range(days):
         # Determine decision based on strategy
         strategy_func = choose_strategy(agent['strategy_id'])
         if callable(strategy_func):  # Check if strategy function is callable
-            if (agent['strategy_id'] == 3):
-                (agent['p'], agent['threshold_adjust']) = strategy_func(agent['strategy_days'], 0.548, agent['threshold_adjust']) # strat 6
-            else:
-                agent['p'] = strategy_func(agent['strategy_days'], agent['p']) #strat 2
+            agent['p'] = strategy_func(agent['strategy_days'], agent['p']) # strat 2
 
         decision = np.random.binomial(1, agent['p'])
         decisions.append(decision)
-
+        
         history_seperated[agent['strategy_id']][day]+=decision
 
     n_going = np.sum(decisions)
@@ -154,12 +141,6 @@ color_mapping = {
     3: 'orange'
 }
 shapes = ['o', 's']  # Circles for going, squares for staying
-
-factorList = {
-    1:'Nash Equilibrium',
-    2:"P Adjustment (0.05 factor)",
-    3: 'Threshold Adjustment (0.05 factor)'
-}
 
 # Convert history to a NumPy array for easier statistical calculations
 history_array = np.array(history)
@@ -222,7 +203,7 @@ plt.plot(range(1, 201), history[:200], label='Overall', color='black', linewidth
 plt.axhline(y=threshold_crowded, color='red', linestyle='--', label='Threshold Capacity')
 
 # Fit a polynomial of degree 2 (you can change the degree as needed)
-degree = 3
+degree = 2
 pfit = Polynomial.fit(range(1, 200 + 1), history[:200], degree)
 trendline = pfit(range(1, 200 + 1))
 
@@ -237,16 +218,49 @@ plt.grid(True)
 plt.show()
     
 
+    
+
+# bottom = np.zeros(days)  # Initialize the bottom of the bars to zero
+
+# # Plotting a stacked bar chart for each strategy
+# for strategy_id, counts in history_seperated.items():
+#     color = color_mapping[strategy_id]  # Get the color based on the strategy ID
+#     plt.bar(range(1, len(counts) + 1), counts, label=f'Strategy {strategy_id}', color=color, alpha=0.6, bottom=bottom)
+#     bottom += np.array(counts)  # Update the bottom for the next set of bars
+
+# plt.xlabel('Day')
+# plt.ylabel('Number of Agents at Bar')
+# plt.title('Bar attendance over time by strategy')
+# plt.legend()
+# plt.grid(True)
+# plt.show()
+
+# factorList = {
+#     1: "Nash Equilibrium",
+#     2: "Change p factor:0.05",
+#     3: "Change threshold factor:0.05"
+# }
+
+
+# for agent in agent_profiles:
+#     strategy_id = agent['strategy_id']
+#     cumulative_utility = 0
+#     for day in range(days):
+#         total_utility = sum(agent['history'][d]['utility'] for d in range(day + 1) if agent['strategy_id'] == strategy_id)
+#         cumulative_utility += total_utility
+#         cumulative_utilities_by_strategy_day[strategy_id][day] = total_utility
+
 for strategy_id, cumulative_utilities in cumulative_utilities_by_strategy_day.items():
     color = color_mapping[strategy_id]  # Get the color based on the strategy ID
     plt.plot(range(1, days + 1), cumulative_utilities, label=f'Strategy {factorList[strategy_id]}', color=color)
 
 plt.xlabel('Day')
 plt.ylabel('Cumulative Utility')
-plt.title('Cumulative Utility by Strategy Over Time')
+plt.title('Cumulative Utility by Strategy Over Time (p adjustment)')
 plt.legend()
 plt.grid(True)
 plt.show()
+
 
 # Keep track of which strategies have already been plotted
 plotted_strategies = set()
@@ -256,11 +270,9 @@ for agent in agent_profiles:
     strategy_id = agent['strategy_id']
     color = color_mapping[strategy_id]  # Get color based on strategy ID
     p_values = [history_point['p'] for history_point in agent['history']]
-
-
     if strategy_id not in plotted_strategies:
         plt.plot(range(1, len(p_values) + 1), p_values, label=f'Strategy {factorList[strategy_id]}', color=color)
-   
+        
         # Print the results
         print(f"Statistical Information on P ADJUST {strategy_id} :")
 
@@ -276,46 +288,11 @@ for agent in agent_profiles:
         print(f"Median: {median}")
         print(f"Standard Deviation: {std_dev}")
         print(f"Variance: {variance}")
-   
     plotted_strategies.add(strategy_id)
 
 plt.xlabel('Day')
 plt.ylabel('p value')
 plt.title('Change in p values for each agent over time')
-plt.legend()
-plt.grid(True)
-plt.show()
-
-plotted_strategies = set()
-
-for agent in agent_profiles:
-    strategy_id = agent['strategy_id']
-    color = color_mapping[strategy_id]  # Get color based on strategy ID
-    threshold_adjust_values = [history_point['threshold_adjust']+50 for history_point in agent['history']]  # Get threshold_adjust values
-    if strategy_id not in plotted_strategies:
-        plt.plot(range(1, len(threshold_adjust_values) + 1), threshold_adjust_values, label=f'Strategy {factorList[strategy_id]}', color=color)  # Plot threshold_adjust values with dashed line
-    
-        # Print the results
-        print(f"Statistical Information on THRESHOLD {strategy_id}:")
-
-        history_array = np.array(threshold_adjust_values)
-
-        # Calculate statistical information
-        mean = np.mean(history_array)
-        median = np.median(history_array)
-        std_dev = np.std(history_array)
-        variance = np.var(history_array)
-
-        print(f"Mean: {mean}")
-        print(f"Median: {median}")
-        print(f"Standard Deviation: {std_dev}")
-        print(f"Variance: {variance}")
-    
-    plotted_strategies.add(strategy_id)
-
-plt.xlabel('Day')
-plt.ylabel('Adjusted Threshold')
-plt.title('Change in thresholds for each agent over time ')
 plt.legend()
 plt.grid(True)
 plt.show()
