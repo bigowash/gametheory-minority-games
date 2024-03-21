@@ -12,6 +12,8 @@ Section 2.2: [new_utilities](./new_utilities.py)
 
 Section 3.2: [expected_utilities](./expected_utilities.py)
 
+Section 3.3: [nash_equilibria](./nash_equilibria.m)
+
 Section 3.4: [singleshot_given_p](./singleshot_given_p.py)
 
 Section 4.0: [repeated_dumb](./repeated_dumb.py)
